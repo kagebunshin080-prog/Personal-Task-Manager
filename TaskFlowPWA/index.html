@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Personal Task Manager Dashboard</title>
+
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#1f2937">
+    <link rel="icon" href="icons/icon-192.png">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Auth screen: shown until the user logs in or registers -->
+    <div class="auth-screen" id="authScreen">
+        <div class="auth-card">
+            <h2>TaskFlow</h2>
+            <p class="auth-subtitle">Sign in to sync your tasks across devices.</p>
+
+            <div class="auth-tabs">
+                <button type="button" class="auth-tab active" id="authTabLogin">Log In</button>
+                <button type="button" class="auth-tab" id="authTabRegister">Sign Up</button>
+            </div>
+
+            <p class="auth-error" id="authError" style="display:none;"></p>
+
+            <form id="authForm">
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="authEmail" placeholder="you@example.com" required autocomplete="email">
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="authPassword" placeholder="At least 8 characters" required autocomplete="current-password" minlength="8">
+                </div>
+
+                <button type="submit" class="add-task-btn auth-submit-btn" id="authSubmitBtn">Log In</button>
+            </form>
+
+            <div class="auth-divider"><span>or</span></div>
+
+            <!-- Google Identity Services renders its own button inside this div -->
+            <div id="googleSignInBtn" style="display:flex; justify-content:center;"></div>
+        </div>
+    </div>
+
+    <!-- Google Identity Services library -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+    <div class="app-shell" id="appShell" style="display:none;">
+
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <div class="sidebar" id="sidebar">
+
+        <h2>TaskFlow</h2>
+
+        <ul>
+            <li class="active" id="navDashboard" data-view="dashboard">🏠 Dashboard</li>
+            <li id="navTasks" data-view="tasks">✅ My Tasks</li>
+            <li id="navCalendar" data-view="calendar">📅 Calendar</li>
+            <li id="navPriorities" data-view="priorities">⭐ Priorities</li>
+            <li id="navReports" data-view="reports">📊 Reports</li>
+            <li id="navSettings" data-view="settings">⚙️ Settings</li>
+        </ul>
+
+    </div>
+
+    <div class="main">
+
+<header>
+
+    <div class="header-title">
+        <button type="button" id="menuToggle" class="menu-toggle" aria-label="Open menu">☰</button>
+        <div>
+            <h1 id="pageTitle">Personal Dashboard</h1>
+            <p id="pageSubtitle">Stay organized and productive.</p>
+        </div>
+    </div>
+
+    <div class="header-actions">
+        <input type="text" placeholder="Search tasks...">
+
+        <button id="addTaskBtn" class="add-task-btn">
+            + New Task
+        </button>
+
+        <div class="profile" id="profileMenu" title="Click to log out">
+            <div class="avatar" id="userAvatar">?</div>
+
+            <div>
+                <strong id="userEmailLabel">-</strong><br>
+                <small>Click to log out</small>
+            </div>
+        </div>
+    </div>
+
+</header>
+
+        <div class="view-block" id="dashboardView">
+
+        <div class="stats">
+
+            <div class="card">
+                <h3>Total Tasks</h3>
+                <h1 id="totalTasksCount">0</h1>
+            </div>
+
+            <div class="card">
+                <h3>Completed</h3>
+                <h1 id="completedCount">0</h1>
+            </div>
+
+            <div class="card">
+                <h3>Pending</h3>
+                <h1 id="pendingCount">0</h1>
+            </div>
+
+            <div class="card">
+                <h3>Overdue</h3>
+                <h1 id="overdueCount">0</h1>
+            </div>
+
+        </div>
+
+        <div class="dashboard">
+
+            <div class="task-box">
+
+                <h2>Today's Tasks</h2>
+
+                <div class="table-scroll">
+                <table>
+
+                    <thead>
+                        <tr>
+                            <th>Task</th>
+                            <th>Due</th>
+                            <th>Priority</th>
+                            <th>Status</th>
+			    <th>Action</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="taskTableBody">
+                    </tbody>
+
+                </table>
+                </div>
+
+            </div>
+
+            <div class="panel">
+
+                <div class="calendar">
+                    <div class="calendar-header">
+                        <button type="button" id="calPrevBtn" class="cal-nav-btn" aria-label="Previous month">&#8249;</button>
+                        <h2 id="calMonthLabel">Calendar</h2>
+                        <button type="button" id="calNextBtn" class="cal-nav-btn" aria-label="Next month">&#8250;</button>
+                    </div>
+
+                    <div class="calendar-box">
+                        <div class="calendar-weekdays">
+                            <span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span>
+                        </div>
+                        <div class="calendar-grid" id="calendarGrid"></div>
+
+                        <div class="calendar-legend">
+                            <span class="legend-swatch" style="background:#fff;"></span> None
+                            <span class="legend-swatch" style="background:#fecaca;"></span> Some
+                            <span class="legend-swatch" style="background:#dc2626;"></span> Most pending
+                        </div>
+                    </div>
+                </div>
+
+                <div class="notes">
+
+                    <h2>Quick Notes</h2>
+
+                    <textarea placeholder="Write your notes here..."></textarea>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        </div>
+
+        <!-- Calendar page (sidebar "Calendar" link) -->
+        <div class="view-block" id="calendarPageView" style="display:none;">
+
+            <div class="calendar-page-layout">
+
+                <div class="calendar full-size">
+                    <div class="calendar-header">
+                        <button type="button" id="calPageprevBtn" class="cal-nav-btn" aria-label="Previous month">&#8249;</button>
+                        <h2 id="calPageMonthLabel">Calendar</h2>
+                        <button type="button" id="calPageNextBtn" class="cal-nav-btn" aria-label="Next month">&#8250;</button>
+                    </div>
+
+                    <div class="calendar-box">
+                        <div class="calendar-weekdays">
+                            <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
+                        </div>
+                        <div class="calendar-grid full-size" id="calendarPageGrid"></div>
+
+                        <div class="calendar-legend">
+                            <span class="legend-swatch" style="background:#fff;"></span> None
+                            <span class="legend-swatch" style="background:#fecaca;"></span> Some
+                            <span class="legend-swatch" style="background:#dc2626;"></span> Most pending
+                        </div>
+                    </div>
+                </div>
+
+                <div class="day-panel">
+                    <div class="day-panel-header">
+                        <h2 id="dayPanelTitle">Select a day</h2>
+                        <button type="button" id="dayPanelAddBtn" class="add-task-btn">+ Add Task</button>
+                    </div>
+                    <ul class="day-panel-list" id="dayPanelList">
+                        <li class="day-panel-empty">Click a day on the calendar to see what's due.</li>
+                    </ul>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Placeholder for sidebar links not built out yet -->
+        <div class="view-block" id="stubView" style="display:none;">
+            <div class="stub-card">
+                <h2 id="stubHeading">Coming Soon</h2>
+                <p>This section isn't built yet — check back soon!</p>
+            </div>
+        </div>
+
+
+    </div>
+
+    </div>
+    <!-- /app-shell -->
+
+
+<!-- Task Modal -->
+<div class="modal" id="taskModal">
+
+    <div class="modal-content">
+
+        <div class="modal-header">
+            <h2 id="modalTitle">New Task</h2>
+            <span class="close-btn">&times;</span>
+        </div>
+
+        <form id="taskForm">
+
+            <div class="form-group">
+                <label>Task Name</label>
+                <input
+                    type="text"
+                    id="taskName"
+                    placeholder="Enter task..."
+                    required>
+            </div>
+
+            <div class="form-group">
+                <label>Due Date</label>
+                <input
+                    type="date"
+                    id="taskDate"
+                    required>
+            </div>
+
+            <div class="form-group">
+                <label>Priority</label>
+
+                <select id="taskPriority">
+
+                    <option>High</option>
+                    <option>Medium</option>
+                    <option>Low</option>
+
+                </select>
+
+            </div>
+
+            <div class="form-group">
+                <label>Status</label>
+
+                <select id="taskStatus">
+
+                    <option>Pending</option>
+                    <option>In Progress</option>
+                    <option>Completed</option>
+
+                </select>
+
+            </div>
+
+            <div class="modal-buttons">
+
+                <button
+                    type="button"
+                    class="cancel-btn">
+                    Cancel
+                </button>
+
+                <button
+                    type="submit"
+                    class="save-btn">
+                    Save Task
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+
+<script>
+    // --- Point this at your deployed Railway backend ---
+    // e.g. "https://taskflow-backend-production.up.railway.app/api"
+    window.API_BASE_URL = "https://taskflow-backend-production.up.railway.app/api";
+    // --- Replace with your real Google OAuth Client ID from Google Cloud Console ---
+    window.GOOGLE_CLIENT_ID = "YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com";
+</script>
+<script src="script.js"></script>
+<script>
+    if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+            navigator.serviceWorker.register("service-worker.js").catch(console.error);
+        });
+    }
+</script>
+</body>
+</html>
